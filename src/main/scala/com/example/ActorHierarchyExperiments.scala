@@ -13,6 +13,9 @@ class PrintMyActorRefActor extends Actor {
 
   override def receive: Receive = {
     case "printit" =>
+      // Create child, or non-top-level, actors by invoking context.actorOf() from an existing actor.
+      // The context.actorOf() method has a signature identical to system.actorOf(), its top-level counterpart.
+      // This creates an actor that is a *child* of `firstRef` (below).
       val secondRef = context.actorOf(Props.empty, "second-actor")
       println(s"Second: $secondRef")
   }
@@ -30,3 +33,8 @@ object ActorHierarchyExperiments extends App {
   try StdIn.readLine()
   finally system.terminate()
 }
+
+// OUTPUT:
+// First: Actor[akka://testSystem/user/first-actor#-663967645]
+// >>> Press ENTER to exit <<<
+// Second: Actor[akka://testSystem/user/first-actor/second-actor#1065373572]
