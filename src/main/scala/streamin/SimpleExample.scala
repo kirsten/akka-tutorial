@@ -5,7 +5,7 @@ import java.nio.file.Paths
 import akka.{Done, NotUsed}
 import akka.actor.ActorSystem
 import akka.stream.{ActorMaterializer, IOResult}
-import akka.stream.scaladsl.{FileIO, Source}
+import akka.stream.scaladsl.{FileIO, Flow, Keep, Sink, Source}
 import akka.util.ByteString
 
 import scala.concurrent.{ExecutionContextExecutor, Future}
@@ -37,5 +37,16 @@ object SimpleExample extends App {
   val result: Future[IOResult] = factorials.map { num =>
     ByteString(s"$num\n")
   }.runWith(FileIO.toPath(Paths.get("factorials.txt")))
+
+  // Extracting a `lineSink`
+  def lineSink(filename: String): Sink[String, Future[IOResult]] =
+    Flow[String]
+      .map(s => ByteString(s + "\n"))
+      .toMat(FileIO.toPath(Paths.get(filename)))(Keep.right)
+
+  // Running with the `lineSink` instead
+  factorials.map(_.toString).runWith(lineSink("factorial2.txt"))
+
+
 }
 
